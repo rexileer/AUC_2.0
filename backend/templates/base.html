@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta
+            name="description"
+            content="{% block meta_description %}Online Auction Platform - Bid on unique items and create your own auctions{% endblock %}"
+        />
+        <meta
+            name="keywords"
+            content="{% block meta_keywords %}auction, bidding, online marketplace, buy, sell{% endblock %}"
+        />
+        <meta name="author" content="Auction Platform" />
+
+        <!-- CSRF Token for AJAX requests -->
+        <meta name="csrf-token" content="{{ csrf_token }}" />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+        <meta
+            property="og:title"
+            content="{% block og_title %}Auction Platform{% endblock %}"
+        />
+        <meta
+            property="og:description"
+            content="{% block og_description %}Online Auction Platform - Bid on unique items{% endblock %}"
+        />
+        <meta
+            property="og:image"
+            content="{% block og_image %}{% load static %}{% static 'images/og-image.jpg' %}{% endblock %}"
+        />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta
+            property="twitter:url"
+            content="{{ request.build_absolute_uri }}"
+        />
+        <meta
+            property="twitter:title"
+            content="{% block twitter_title %}Auction Platform{% endblock %}"
+        />
+        <meta
+            property="twitter:description"
+            content="{% block twitter_description %}Online Auction Platform{% endblock %}"
+        />
+        <meta
+            property="twitter:image"
+            content="{% block twitter_image %}{% load static %}{% static 'images/og-image.jpg' %}{% endblock %}"
+        />
+
+        <title>{% block title %}Auction Platform{% endblock %}</title>
+
+        <!-- Favicon -->
+        <link
+            rel="icon"
+            type="image/x-icon"
+            href="{% load static %}{% static 'images/favicon.ico' %}"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="{% load static %}{% static 'images/apple-touch-icon.png' %}"
+        />
+
+        <!-- Bootstrap 5 CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+
+        <!-- Bootstrap Icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+        />
+
+        <!-- Font Awesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+
+        <!-- Custom CSS -->
+        <link
+            rel="stylesheet"
+            href="{% load static %}{% static 'css/main.css' %}"
+        />
+
+        <!-- Additional CSS -->
+        {% block extra_css %}{% endblock %}
+
+        <style>
+            :root {
+                --primary-color: #007bff;
+                --secondary-color: #6c757d;
+                --success-color: #28a745;
+                --danger-color: #dc3545;
+                --warning-color: #ffc107;
+                --info-color: #17a2b8;
+                --light-color: #f8f9fa;
+                --dark-color: #343a40;
+            }
+
+            .navbar-brand {
+                font-weight: bold;
+                font-size: 1.5rem;
+            }
+
+            .notification-badge {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: var(--danger-color);
+                color: white;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                font-size: 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .toast-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1080;
+            }
+
+            .auction-item {
+                transition: transform 0.2s ease-in-out;
+                border: 1px solid #dee2e6;
+                border-radius: 0.5rem;
+            }
+
+            .auction-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .bid-button {
+                background: linear-gradient(
+                    45deg,
+                    var(--primary-color),
+                    var(--info-color)
+                );
+                border: none;
+                color: white;
+                font-weight: bold;
+            }
+
+            .bid-button:hover {
+                background: linear-gradient(
+                    45deg,
+                    var(--info-color),
+                    var(--primary-color)
+                );
+                color: white;
+            }
+
+            .time-left {
+                font-weight: bold;
+                color: var(--warning-color);
+            }
+
+            .time-left.ending-soon {
+                color: var(--danger-color);
+                animation: pulse 1s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .sidebar {
+                background: var(--light-color);
+                border-right: 1px solid #dee2e6;
+                min-height: calc(100vh - 76px);
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+            .balance-display {
+                background: linear-gradient(
+                    45deg,
+                    var(--success-color),
+                    #20c997
+                );
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 1rem;
+                font-weight: bold;
+            }
+
+            .loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+
+            .spinner-border-sm {
+                width: 1rem;
+                height: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'auctions:home' %}">
+                    <i class="fas fa-gavel"></i> Auction Platform
+                </a>
+
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="{% url 'auctions:home' %}"
+                            >
+                                <i class="fas fa-home"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="{% url 'auctions:items' %}"
+                            >
+                                <i class="fas fa-list"></i> Auctions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="{% url 'auctions:categories' %}"
+                            >
+                                <i class="fas fa-tags"></i> Categories
+                            </a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a
+                                class="nav-link"
+                                href="{% url 'auctions:create_item' %}"
+                            >
+                                <i class="fas fa-plus"></i> Create Auction
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                        <!-- Notifications -->
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link position-relative"
+                                href="#"
+                                id="notificationsDropdown"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                            >
+                                <i class="fas fa-bell"></i>
+                                <span
+                                    class="notification-badge"
+                                    id="notificationCount"
+                                    style="display: none"
+                                    >0</span
+                                >
+                            </a>
+                            <ul
+                                class="dropdown-menu dropdown-menu-end"
+                                style="width: 300px"
+                            >
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        Notifications
+                                    </h6>
+                                </li>
+                                <div id="notificationsList">
+                                    <li>
+                                        <span
+                                            class="dropdown-item-text text-muted"
+                                            >No new notifications</span
+                                        >
+                                    </li>
+                                </div>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a
+                                        class="dropdown-item text-center"
+                                        href="/notify/"
+                                        >View All</a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Balance -->
+                        <li class="nav-item">
+                            <span
+                                class="nav-link balance-display"
+                                id="userBalance"
+                            >
+                                ${{ user.balance|floatformat:2 }}
+                            </span>
+                        </li>
+
+                        <!-- User Menu -->
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link dropdown-toggle d-flex align-items-center"
+                                href="#"
+                                id="userDropdown"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                            >
+                                {% if user.avatar %}
+                                <img
+                                    src="{{ user.avatar.url }}"
+                                    alt="Avatar"
+                                    class="user-avatar me-2"
+                                />
+                                {% else %}
+                                <i class="fas fa-user-circle me-2"></i>
+                                {% endif %} {{ user.get_display_name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/dashboard/"
+                                    >
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/profile/"
+                                    >
+                                        <i class="fas fa-user"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/balance/"
+                                    >
+                                        <i class="fas fa-wallet"></i> Balance
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/history/"
+                                    >
+                                        <i class="fas fa-history"></i> History
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/settings/"
+                                    >
+                                        <i class="fas fa-cog"></i> Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                {% if user.is_staff %}
+                                <li>
+                                    <a class="dropdown-item" href="/admin/">
+                                        <i class="fas fa-tools"></i> Admin Panel
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                {% endif %}
+                                <li>
+                                    <a
+                                        class="dropdown-item"
+                                        href="/user/logout/"
+                                    >
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/login/">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user/register/">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Toast Container for Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Main Content -->
+        <main>
+            {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                <div
+                    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                    role="alert"
+                >
+                    {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'info' %}
+                    <i class="fas fa-info-circle"></i>
+                    {% endif %} {{ message }}
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %} {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-light py-4 mt-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-gavel"></i> Auction Platform</h5>
+                        <p>
+                            Your trusted online auction marketplace for unique
+                            items and great deals.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="text-light me-2"
+                                ><i class="fab fa-facebook"></i
+                            ></a>
+                            <a href="#" class="text-light me-2"
+                                ><i class="fab fa-twitter"></i
+                            ></a>
+                            <a href="#" class="text-light me-2"
+                                ><i class="fab fa-instagram"></i
+                            ></a>
+                            <a href="#" class="text-light"
+                                ><i class="fab fa-linkedin"></i
+                            ></a>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <h6>Platform</h6>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a
+                                    href="{% url 'auctions:home' %}"
+                                    class="text-light"
+                                    >Home</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="{% url 'auctions:items' %}"
+                                    class="text-light"
+                                    >Auctions</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="{% url 'auctions:categories' %}"
+                                    class="text-light"
+                                    >Categories</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#" class="text-light">How it Works</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2">
+                        <h6>Account</h6>
+                        <ul class="list-unstyled">
+                            {% if user.is_authenticated %}
+                            <li>
+                                <a href="/user/dashboard/" class="text-light"
+                                    >Dashboard</a
+                                >
+                            </li>
+                            <li>
+                                <a href="/user/profile/" class="text-light"
+                                    >Profile</a
+                                >
+                            </li>
+                            <li>
+                                <a href="/user/settings/" class="text-light"
+                                    >Settings</a
+                                >
+                            </li>
+                            {% else %}
+                            <li>
+                                <a href="/user/login/" class="text-light"
+                                    >Login</a
+                                >
+                            </li>
+                            <li>
+                                <a href="/user/register/" class="text-light"
+                                    >Register</a
+                                >
+                            </li>
+                            {% endif %}
+                            <li><a href="#" class="text-light">Help</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2">
+                        <h6>Support</h6>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a href="#" class="text-light">Contact Us</a>
+                            </li>
+                            <li><a href="#" class="text-light">FAQ</a></li>
+                            <li>
+                                <a href="#" class="text-light"
+                                    >Terms of Service</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#" class="text-light"
+                                    >Privacy Policy</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2">
+                        <h6>Connect</h6>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a href="#" class="text-light">Telegram Bot</a>
+                            </li>
+                            <li>
+                                <a href="/api/docs/" class="text-light"
+                                    >API Docs</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#" class="text-light">Newsletter</a>
+                            </li>
+                            <li><a href="#" class="text-light">Blog</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            &copy; 2024 Auction Platform. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <p>
+                            Made with
+                            <i class="fas fa-heart text-danger"></i> for auction
+                            enthusiasts
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+        <!-- Bootstrap 5 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- WebSocket connection for real-time notifications -->
+        {% if user.is_authenticated %}
+        <script>
+            // WebSocket for real-time notifications
+            const protocol =
+                window.location.protocol === "https:" ? "wss:" : "ws:";
+            const wsUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+            let socket = null;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+
+            function connectWebSocket() {
+                try {
+                    socket = new WebSocket(wsUrl);
+
+                    socket.onopen = function (event) {
+                        console.log("WebSocket connected");
+                        reconnectAttempts = 0;
+                    };
+
+                    socket.onmessage = function (event) {
+                        const data = JSON.parse(event.data);
+                        handleNotification(data);
+                    };
+
+                    socket.onclose = function (event) {
+                        console.log("WebSocket disconnected");
+                        if (reconnectAttempts < maxReconnectAttempts) {
+                            reconnectAttempts++;
+                            setTimeout(
+                                connectWebSocket,
+                                3000 * reconnectAttempts,
+                            );
+                        }
+                    };
+
+                    socket.onerror = function (error) {
+                        console.error("WebSocket error:", error);
+                    };
+                } catch (error) {
+                    console.error("Failed to connect WebSocket:", error);
+                }
+            }
+
+            function handleNotification(data) {
+                // Update notification count
+                updateNotificationCount();
+
+                // Show toast notification
+                showToast(data.title, data.message, data.type || "info");
+
+                // Add to notifications dropdown
+                addToNotificationsList(data);
+
+                // Update balance if changed
+                if (data.balance_updated && data.new_balance) {
+                    document.getElementById("userBalance").textContent =
+                        `$${parseFloat(data.new_balance).toFixed(2)}`;
+                }
+            }
+
+            function showToast(title, message, type = "info") {
+                const toastContainer =
+                    document.getElementById("toastContainer");
+                const toastId = "toast-" + Date.now();
+
+                const iconClass =
+                    {
+                        success: "fas fa-check-circle text-success",
+                        error: "fas fa-exclamation-triangle text-danger",
+                        warning: "fas fa-exclamation-circle text-warning",
+                        info: "fas fa-info-circle text-info",
+                    }[type] || "fas fa-info-circle text-info";
+
+                const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <div class="d-flex align-items-center">
+                                <i class="${iconClass} me-2"></i>
+                                <div>
+                                    <strong>${title}</strong><br>
+                                    <small>${message}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+                toastContainer.insertAdjacentHTML("beforeend", toastHTML);
+
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, {
+                    autohide: true,
+                    delay: 5000,
+                });
+
+                toast.show();
+
+                // Remove toast element after it's hidden
+                toastElement.addEventListener("hidden.bs.toast", function () {
+                    toastElement.remove();
+                });
+            }
+
+            function updateNotificationCount() {
+                fetch("/api/notifications/unread-count/", {
+                    headers: {
+                        "X-CSRFToken": document
+                            .querySelector("[name=csrf-token]")
+                            .getAttribute("content"),
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const badge =
+                            document.getElementById("notificationCount");
+                        if (data.count > 0) {
+                            badge.textContent =
+                                data.count > 99 ? "99+" : data.count;
+                            badge.style.display = "flex";
+                        } else {
+                            badge.style.display = "none";
+                        }
+                    })
+                    .catch((error) =>
+                        console.error(
+                            "Error updating notification count:",
+                            error,
+                        ),
+                    );
+            }
+
+            function addToNotificationsList(data) {
+                // This would add the notification to the dropdown list
+                // Implementation depends on your notification structure
+            }
+
+            // Initialize WebSocket connection
+            connectWebSocket();
+
+            // Update notification count on page load
+            updateNotificationCount();
+
+            // CSRF token for AJAX requests
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (
+                        !/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) &&
+                        !this.crossDomain
+                    ) {
+                        xhr.setRequestHeader(
+                            "X-CSRFToken",
+                            $("[name=csrf-token]").attr("content"),
+                        );
+                    }
+                },
+            });
+        </script>
+        {% endif %}
+
+        <!-- Custom JavaScript -->
+        <script src="{% load static %}{% static 'js/main.js' %}"></script>
+
+        <!-- Additional JavaScript -->
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

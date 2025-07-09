@@ -1,0 +1,125 @@
+version: "3.8"
+
+services:
+  db:
+    build: ./postgres
+    environment:
+      POSTGRES_DB: auction_db
+      POSTGRES_USER: auction_user
+      POSTGRES_PASSWORD: auction_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: auction_user
+      RABBITMQ_DEFAULT_PASS: auction_password
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    command: >
+      sh -c "chmod +x /app/entrypoint.sh &&
+             /app/entrypoint.sh &&
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 auction.asgi:application"
+    volumes:
+      - ./backend:/app
+      - ./static:/app/static
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://auction_user:auction_password@db:5432/auction_db
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://auction_user:auction_password@rabbitmq:5672/
+    restart: unless-stopped
+
+  celery:
+    build: ./backend
+    command: sh -c "chmod +x /app/entrypoint.sh && celery -A auction worker -l info"
+    volumes:
+      - ./backend:/app
+      - ./media:/app/media
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://auction_user:auction_password@db:5432/auction_db
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://auction_user:auction_password@rabbitmq:5672/
+    restart: unless-stopped
+
+  celery-beat:
+    build: ./backend
+    command: sh -c "chmod +x /app/entrypoint.sh && celery -A auction beat -l info"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://auction_user:auction_password@db:5432/auction_db
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://auction_user:auction_password@rabbitmq:5672/
+    restart: unless-stopped
+
+  bot:
+    build: ./bot
+    command: python bot.py
+    volumes:
+      - ./bot:/app
+    depends_on:
+      - backend
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - BOT_TOKEN=${BOT_TOKEN}
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/var/www/static
+      - ./media:/var/www/media
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
