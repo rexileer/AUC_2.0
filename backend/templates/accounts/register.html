@@ -1,0 +1,513 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - AUC 2.0{% endblock %}
+
+{% block extra_css %}
+<style>
+.register-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.register-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.register-header h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.register-header p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.btn-register {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #dee2e6;
+}
+
+.divider span {
+    background: #fff;
+    padding: 0 1rem;
+    color: #6c757d;
+}
+
+.social-register {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-register .btn {
+    flex: 1;
+    padding: 0.75rem;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.register-benefits {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.register-benefits h5 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.register-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.register-benefits li {
+    padding: 0.25rem 0;
+    color: #6c757d;
+}
+
+.register-benefits li i {
+    color: #28a745;
+    margin-right: 0.5rem;
+}
+
+.password-strength {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.password-strength-bar {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0.25rem 0;
+}
+
+.password-strength-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    width: 0%;
+}
+
+.strength-weak .password-strength-fill {
+    background-color: #dc3545;
+    width: 25%;
+}
+
+.strength-fair .password-strength-fill {
+    background-color: #fd7e14;
+    width: 50%;
+}
+
+.strength-good .password-strength-fill {
+    background-color: #ffc107;
+    width: 75%;
+}
+
+.strength-strong .password-strength-fill {
+    background-color: #28a745;
+    width: 100%;
+}
+
+.terms-checkbox {
+    margin: 1.5rem 0;
+}
+
+.terms-checkbox .form-check-label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.terms-checkbox a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.terms-checkbox a:hover {
+    text-decoration: underline;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        padding: 1rem;
+    }
+
+    .register-card {
+        padding: 1.5rem;
+    }
+
+    .social-register {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-9">
+            <div class="register-container">
+                <div class="register-card">
+                    <div class="register-header">
+                        <h2><i class="fas fa-user-plus me-2"></i>Join AUC 2.0</h2>
+                        <p>Create your account and start bidding today</p>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form method="post" id="registerForm">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="id_username" name="username"
+                                   placeholder="Username" value="{{ form.username.value|default:'' }}" required>
+                            <label for="id_username">
+                                <i class="fas fa-user me-2"></i>Username
+                            </label>
+                            <div class="form-text">
+                                Choose a unique username (3-30 characters)
+                            </div>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="id_email" name="email"
+                                   placeholder="Email Address" value="{{ form.email.value|default:'' }}" required>
+                            <label for="id_email">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <div class="form-text">
+                                We'll use this to send you important account notifications
+                            </div>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="id_first_name" name="first_name"
+                                   placeholder="First Name" value="{{ form.first_name.value|default:'' }}">
+                            <label for="id_first_name">
+                                <i class="fas fa-id-card me-2"></i>First Name
+                            </label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="id_last_name" name="last_name"
+                                   placeholder="Last Name" value="{{ form.last_name.value|default:'' }}">
+                            <label for="id_last_name">
+                                <i class="fas fa-id-card me-2"></i>Last Name
+                            </label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="id_password1" name="password1"
+                                   placeholder="Password" required>
+                            <label for="id_password1">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="password-strength-bar">
+                                    <div class="password-strength-fill"></div>
+                                </div>
+                                <div class="strength-text">Password strength: <span id="strengthText">Not set</span></div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="id_password2" name="password2"
+                                   placeholder="Confirm Password" required>
+                            <label for="id_password2">
+                                <i class="fas fa-lock me-2"></i>Confirm Password
+                            </label>
+                            <div class="form-text" id="passwordMatch"></div>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="tel" class="form-control" id="id_phone" name="phone"
+                                   placeholder="Phone Number" value="{{ form.phone.value|default:'' }}">
+                            <label for="id_phone">
+                                <i class="fas fa-phone me-2"></i>Phone Number (Optional)
+                            </label>
+                            <div class="form-text">
+                                For account verification and security
+                            </div>
+                        </div>
+
+                        <div class="terms-checkbox">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms_agreed" name="terms_agreed" required>
+                                <label class="form-check-label" for="terms_agreed">
+                                    I agree to the <a href="{% url 'auctions:terms' %}" target="_blank">Terms of Service</a>
+                                    and <a href="{% url 'auctions:privacy' %}" target="_blank">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" checked>
+                            <label class="form-check-label" for="newsletter">
+                                I'd like to receive email updates about new features and promotions
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-register">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+
+                    <!-- Social Registration Buttons -->
+                    <div class="social-register">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fab fa-google me-2"></i>Google
+                        </button>
+                        <button type="button" class="btn btn-outline-info">
+                            <i class="fab fa-telegram me-2"></i>Telegram
+                        </button>
+                    </div>
+
+                    <div class="login-link">
+                        <p class="mb-0">Already have an account?
+                            <a href="{% url 'accounts_web:login' %}" class="text-decoration-none">
+                                <strong>Sign in here</strong>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Registration Benefits -->
+                <div class="register-benefits">
+                    <h5><i class="fas fa-gift me-2"></i>What You Get</h5>
+                    <ul>
+                        <li><i class="fas fa-check"></i>$10 welcome bonus</li>
+                        <li><i class="fas fa-check"></i>Access to exclusive auctions</li>
+                        <li><i class="fas fa-check"></i>Real-time bid notifications</li>
+                        <li><i class="fas fa-check"></i>Secure payment processing</li>
+                        <li><i class="fas fa-check"></i>24/7 customer support</li>
+                        <li><i class="fas fa-check"></i>Mobile app access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const submitBtn = registerForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const strengthText = document.getElementById('strengthText');
+    const passwordMatch = document.getElementById('passwordMatch');
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = [];
+
+        if (password.length >= 8) strength += 1;
+        else feedback.push('At least 8 characters');
+
+        if (/[a-z]/.test(password)) strength += 1;
+        else feedback.push('lowercase letter');
+
+        if (/[A-Z]/.test(password)) strength += 1;
+        else feedback.push('uppercase letter');
+
+        if (/[0-9]/.test(password)) strength += 1;
+        else feedback.push('number');
+
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        else feedback.push('special character');
+
+        return { strength, feedback };
+    }
+
+    // Update password strength display
+    function updatePasswordStrength() {
+        const password = password1.value;
+        const result = checkPasswordStrength(password);
+
+        passwordStrength.className = 'password-strength';
+
+        if (password.length === 0) {
+            strengthText.textContent = 'Not set';
+            return;
+        }
+
+        if (result.strength <= 2) {
+            passwordStrength.classList.add('strength-weak');
+            strengthText.textContent = 'Weak';
+        } else if (result.strength === 3) {
+            passwordStrength.classList.add('strength-fair');
+            strengthText.textContent = 'Fair';
+        } else if (result.strength === 4) {
+            passwordStrength.classList.add('strength-good');
+            strengthText.textContent = 'Good';
+        } else {
+            passwordStrength.classList.add('strength-strong');
+            strengthText.textContent = 'Strong';
+        }
+
+        if (result.feedback.length > 0) {
+            strengthText.textContent += ` (Missing: ${result.feedback.join(', ')})`;
+        }
+    }
+
+    // Check password match
+    function checkPasswordMatch() {
+        const password1Value = password1.value;
+        const password2Value = password2.value;
+
+        if (password2Value.length === 0) {
+            passwordMatch.textContent = '';
+            passwordMatch.className = 'form-text';
+            return;
+        }
+
+        if (password1Value === password2Value) {
+            passwordMatch.textContent = '✓ Passwords match';
+            passwordMatch.className = 'form-text text-success';
+        } else {
+            passwordMatch.textContent = '✗ Passwords do not match';
+            passwordMatch.className = 'form-text text-danger';
+        }
+    }
+
+    // Event listeners
+    password1.addEventListener('input', updatePasswordStrength);
+    password2.addEventListener('input', checkPasswordMatch);
+    password1.addEventListener('input', checkPasswordMatch);
+
+    // Form submission handler
+    registerForm.addEventListener('submit', function(e) {
+        const password1Value = password1.value;
+        const password2Value = password2.value;
+
+        if (password1Value !== password2Value) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return;
+        }
+
+        if (checkPasswordStrength(password1Value).strength < 3) {
+            e.preventDefault();
+            alert('Please use a stronger password!');
+            return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+
+        // Re-enable button after 10 seconds as fallback
+        setTimeout(function() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }, 10000);
+    });
+
+    // Handle social register buttons
+    const socialBtns = document.querySelectorAll('.social-register .btn');
+    socialBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const provider = this.textContent.trim();
+            console.log(`Social registration with ${provider} clicked`);
+            alert(`${provider} registration will be implemented soon!`);
+        });
+    });
+
+    // Username availability check (placeholder)
+    const usernameField = document.getElementById('id_username');
+    let usernameTimeout;
+
+    usernameField.addEventListener('input', function() {
+        clearTimeout(usernameTimeout);
+        const username = this.value.trim();
+
+        if (username.length >= 3) {
+            usernameTimeout = setTimeout(function() {
+                // Here you would make an AJAX call to check username availability
+                console.log('Checking username availability:', username);
+            }, 500);
+        }
+    });
+
+    // Auto-focus username field
+    document.getElementById('id_username').focus();
+});
+</script>
+{% endblock %}

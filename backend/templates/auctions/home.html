@@ -1,0 +1,826 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - AUC 2.0{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 3rem;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-cta .btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.hero-cta .btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    color: white;
+}
+
+.hero-cta .btn-primary:hover {
+    background: white;
+    color: #667eea;
+}
+
+.hero-cta .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.hero-stat {
+    text-align: center;
+}
+
+.hero-stat h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.hero-stat p {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.section-title p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.featured-auctions {
+    padding: 3rem 0;
+    background: #f8f9fa;
+}
+
+.auction-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.auction-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.auction-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.auction-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.auction-card:hover .auction-image img {
+    transform: scale(1.05);
+}
+
+.auction-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.auction-badge.featured {
+    background: #ffd93d;
+    color: #333;
+}
+
+.auction-badge.ending-soon {
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.auction-content {
+    padding: 1.5rem;
+}
+
+.auction-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.auction-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.auction-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.current-bid {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.bid-count {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.time-left {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.time-left i {
+    margin-right: 0.5rem;
+}
+
+.time-left.ending-soon {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.auction-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bid-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.bid-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.watch-btn {
+    background: transparent;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.watch-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.categories-section {
+    padding: 3rem 0;
+}
+
+.category-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    color: inherit;
+}
+
+.category-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #007bff;
+}
+
+.category-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.category-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.how-it-works {
+    padding: 3rem 0;
+    background: #f8f9fa;
+}
+
+.step-card {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 auto 1rem;
+}
+
+.step-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.step-description {
+    color: #666;
+    line-height: 1.6;
+}
+
+.newsletter-section {
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.newsletter-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.newsletter-form .input-group {
+    margin-top: 2rem;
+}
+
+.newsletter-form .form-control {
+    border: none;
+    padding: 1rem;
+    border-radius: 25px 0 0 25px;
+    font-size: 1.1rem;
+}
+
+.newsletter-form .btn {
+    border-radius: 0 25px 25px 0;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.newsletter-form .btn:hover {
+    background: white;
+    color: #667eea;
+}
+
+.live-stats {
+    padding: 2rem 0;
+    background: #333;
+    color: white;
+}
+
+.live-stat {
+    text-align: center;
+    padding: 1rem;
+}
+
+.live-stat h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #ffd93d;
+}
+
+.live-stat p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    .hero-cta {
+        justify-content: center;
+    }
+
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .auction-card {
+        margin-bottom: 1rem;
+    }
+
+    .category-card {
+        margin-bottom: 1rem;
+    }
+
+    .step-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1>Welcome to AUC 2.0</h1>
+                    <p>The premier online auction platform where you can discover unique items, place bids, and win amazing deals with confidence.</p>
+                    <div class="hero-cta">
+                        <a href="{% url 'auctions:items' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Browse Auctions
+                        </a>
+                        <a href="{% url 'auctions:create_item' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-plus me-2"></i>Create Auction
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <h3 id="totalAuctions">{{ stats.total_auctions|default:"1,234" }}</h3>
+                        <p>Active Auctions</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3 id="totalUsers">{{ stats.total_users|default:"5,678" }}</h3>
+                        <p>Happy Users</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3 id="totalBids">{{ stats.total_bids|default:"23,456" }}</h3>
+                        <p>Bids Placed</p>
+                    </div>
+                    <div class="hero-stat">
+                        <h3 id="totalValue">${{ stats.total_value|default:"2.3M" }}</h3>
+                        <p>Total Value</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Auctions -->
+<section class="featured-auctions">
+    <div class="container">
+        <div class="section-title">
+            <h2>Featured Auctions</h2>
+            <p>Discover the most exciting auctions ending soon</p>
+        </div>
+        <div class="row">
+            {% if featured_auctions %}
+                {% for auction in featured_auctions %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="auction-card">
+                            <div class="auction-image">
+                                <img src="{{ auction.image.url|default:'/static/images/no-image.png' }}" alt="{{ auction.title }}">
+                                {% if auction.is_featured %}
+                                    <div class="auction-badge featured">Featured</div>
+                                {% elif auction.ending_soon %}
+                                    <div class="auction-badge ending-soon">Ending Soon</div>
+                                {% endif %}
+                            </div>
+                            <div class="auction-content">
+                                <h3 class="auction-title">{{ auction.title }}</h3>
+                                <p class="auction-description">{{ auction.description|truncatewords:15 }}</p>
+                                <div class="auction-info">
+                                    <div>
+                                        <div class="current-bid">${{ auction.current_bid|floatformat:2 }}</div>
+                                        <div class="bid-count">{{ auction.bid_count }} bids</div>
+                                    </div>
+                                    <div class="time-left {% if auction.ending_soon %}ending-soon{% endif %}">
+                                        <i class="fas fa-clock"></i>
+                                        {{ auction.time_left }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="auction-footer">
+                                <a href="{% url 'auctions:item_detail' auction.pk %}" class="btn bid-btn">
+                                    <i class="fas fa-gavel me-2"></i>Place Bid
+                                </a>
+                                <button class="btn watch-btn" onclick="toggleWatch({{ auction.pk }})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-gavel fa-3x text-muted mb-3"></i>
+                        <h4>No featured auctions at the moment</h4>
+                        <p class="text-muted">Check back soon for exciting new auctions!</p>
+                        <a href="{% url 'auctions:items' %}" class="btn btn-primary">
+                            Browse All Auctions
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'auctions:featured' %}" class="btn btn-outline-primary btn-lg">
+                View All Featured Auctions
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Browse by Category</h2>
+            <p>Find exactly what you're looking for</p>
+        </div>
+        <div class="row">
+            {% if categories %}
+                {% for category in categories %}
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <a href="{% url 'auctions:category' category.pk %}" class="category-card">
+                            <div class="category-icon">
+                                <i class="fas fa-{{ category.icon|default:'tag' }}"></i>
+                            </div>
+                            <h3 class="category-title">{{ category.name }}</h3>
+                            <p class="category-count">{{ category.item_count }} items</p>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <h3 class="category-title">Electronics</h3>
+                        <p class="category-count">125 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h3 class="category-title">Automotive</h3>
+                        <p class="category-count">89 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h3 class="category-title">Home & Garden</h3>
+                        <p class="category-count">203 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <h3 class="category-title">Fashion</h3>
+                        <p class="category-count">156 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <h3 class="category-title">Sports</h3>
+                        <p class="category-count">78 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="category-title">Books</h3>
+                        <p class="category-count">234 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h3 class="category-title">Collectibles</h3>
+                        <p class="category-count">67 items</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="#" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                        <h3 class="category-title">Other</h3>
+                        <p class="category-count">99 items</p>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'auctions:categories' %}" class="btn btn-outline-primary btn-lg">
+                View All Categories
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-title">
+            <h2>How It Works</h2>
+            <p>Start bidding in three simple steps</p>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Register & Browse</h3>
+                    <p class="step-description">Create your free account and browse through thousands of unique items up for auction.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Place Your Bid</h3>
+                    <p class="step-description">Found something you like? Place your bid and watch the auction unfold in real-time.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Win & Pay</h3>
+                    <p class="step-description">Win the auction and complete your purchase securely through our payment system.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Stats -->
+<section class="live-stats">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="live-stat">
+                    <h3 id="liveAuctions">{{ live_stats.active_auctions|default:"234" }}</h3>
+                    <p>Live Auctions</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="live-stat">
+                    <h3 id="recentBids">{{ live_stats.recent_bids|default:"1,567" }}</h3>
+                    <p>Bids Today</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="live-stat">
+                    <h3 id="onlineUsers">{{ live_stats.online_users|default:"89" }}</h3>
+                    <p>Users Online</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="live-stat">
+                    <h3 id="endingSoon">{{ live_stats.ending_soon|default:"12" }}</h3>
+                    <p>Ending Soon</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter-section">
+    <div class="container">
+        <div class="text-center">
+            <h2>Stay Updated</h2>
+            <p>Get notified about new auctions and special deals</p>
+            <form class="newsletter-form" id="newsletterForm">
+                <div class="input-group">
+                    <input type="email" class="form-control" placeholder="Enter your email address" required>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-paper-plane me-2"></i>Subscribe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Newsletter form submission
+    document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+
+        // Here you would typically send the email to your backend
+        console.log('Newsletter subscription:', email);
+
+        // Show success message
+        alert('Thank you for subscribing! You will receive our latest updates.');
+        this.reset();
+    });
+
+    // Watch button functionality
+    window.toggleWatch = function(itemId) {
+        // Here you would make an AJAX call to toggle watch status
+        console.log('Toggle watch for item:', itemId);
+
+        // For demo purposes, just show a message
+        alert('Watch functionality will be implemented soon!');
+    };
+
+    // Update live stats every 30 seconds
+    setInterval(updateLiveStats, 30000);
+
+    function updateLiveStats() {
+        // Here you would fetch live stats from your API
+        fetch('/api/auctions/live-stats/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('liveAuctions').textContent = data.active_auctions;
+                document.getElementById('recentBids').textContent = data.recent_bids;
+                document.getElementById('onlineUsers').textContent = data.online_users;
+                document.getElementById('endingSoon').textContent = data.ending_soon;
+            })
+            .catch(error => {
+                console.error('Error fetching live stats:', error);
+            });
+    }
+
+    // Animate hero stats on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+            }
+        });
+    }, observerOptions);
+
+    // Observe hero stats
+    document.querySelectorAll('.hero-stat').forEach(stat => {
+        observer.observe(stat);
+    });
+
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add loading states to CTA buttons
+    document.querySelectorAll('.hero-cta .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.href && !this.href.includes('#')) {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+                this.disabled = true;
+
+                // Re-enable after navigation (fallback)
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 2000);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

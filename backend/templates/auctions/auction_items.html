@@ -1,0 +1,1000 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Auction Items - AUC 2.0{% endblock %}
+
+{% block extra_css %}
+<style>
+.items-container {
+    margin-top: 2rem;
+}
+
+.items-header {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.items-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.items-header p {
+    margin: 0.5rem 0 0;
+    color: #666;
+}
+
+.search-filters {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+    margin-bottom: 1rem;
+}
+
+.search-bar .input-group {
+    max-width: 500px;
+}
+
+.search-bar .form-control {
+    border-radius: 25px 0 0 25px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.search-bar .btn {
+    border-radius: 0 25px 25px 0;
+    border: 2px solid #007bff;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+}
+
+.filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.filter-group select {
+    min-width: 150px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.5rem;
+}
+
+.results-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.results-count {
+    font-weight: 500;
+    color: #333;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-toggle .btn {
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #e9ecef;
+    background: white;
+    color: #666;
+    border-radius: 6px;
+}
+
+.view-toggle .btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.auction-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.auction-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.auction-card.list-view {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+}
+
+.auction-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.auction-card.list-view .auction-image {
+    width: 200px;
+    height: 150px;
+    flex-shrink: 0;
+}
+
+.auction-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.auction-card:hover .auction-image img {
+    transform: scale(1.05);
+}
+
+.auction-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+}
+
+.auction-badge.featured {
+    background: #ffd93d;
+    color: #333;
+}
+
+.auction-badge.ending-soon {
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+}
+
+.auction-badge.new {
+    background: #28a745;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.auction-content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.auction-card.list-view .auction-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.auction-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.auction-title:hover {
+    color: #007bff;
+}
+
+.auction-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+.auction-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auction-category {
+    background: #f8f9fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    color: #495057;
+    text-decoration: none;
+}
+
+.auction-category:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.auction-seller {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seller-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.seller-name {
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+}
+
+.seller-name:hover {
+    color: #007bff;
+}
+
+.auction-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.current-bid {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.bid-info {
+    text-align: right;
+}
+
+.bid-count {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.time-left {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-left.ending-soon {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.time-left.ended {
+    color: #6c757d;
+}
+
+.auction-footer {
+    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.auction-card.list-view .auction-footer {
+    padding: 0;
+    margin-top: auto;
+}
+
+.bid-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.bid-btn:hover {
+    background: #0056b3;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.bid-btn.disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.watch-btn {
+    background: transparent;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.watch-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.watch-btn.watching {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pagination .page-link {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    background: white;
+    color: #666;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.pagination .page-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.sidebar {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.sidebar h5 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.sidebar .list-group-item {
+    border: none;
+    padding: 0.5rem 0;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar .list-group-item a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.sidebar .list-group-item a:hover {
+    color: #007bff;
+}
+
+.sidebar .badge {
+    background: #f8f9fa;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.price-range {
+    margin-bottom: 1rem;
+}
+
+.price-range label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.price-range input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.price-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.no-results i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+.no-results h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .items-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .search-filters {
+        padding: 1rem;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group label {
+        margin-bottom: 0.5rem;
+    }
+
+    .results-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .auction-card.list-view {
+        flex-direction: column;
+    }
+
+    .auction-card.list-view .auction-image {
+        width: 100%;
+        height: 200px;
+    }
+
+    .sidebar {
+        position: static;
+        margin-top: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container items-container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="items-header">
+                <h1>Auction Items</h1>
+                <p>Discover amazing items and place your bids</p>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="search-filters">
+                <form method="get" id="searchForm">
+                    <div class="search-bar">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="q" placeholder="Search for items..." value="{{ request.GET.q }}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="category">Category:</label>
+                            <select name="category" id="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.pk }}" {% if request.GET.category == category.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sort">Sort by:</label>
+                            <select name="sort" id="sort" class="form-select">
+                                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest First</option>
+                                <option value="ending_soon" {% if request.GET.sort == 'ending_soon' %}selected{% endif %}>Ending Soon</option>
+                                <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                                <option value="most_bids" {% if request.GET.sort == 'most_bids' %}selected{% endif %}>Most Bids</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="status">Status:</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">All Items</option>
+                                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="ending_soon" {% if request.GET.status == 'ending_soon' %}selected{% endif %}>Ending Soon</option>
+                                <option value="new" {% if request.GET.status == 'new' %}selected{% endif %}>New Today</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Info -->
+            <div class="results-info">
+                <div class="results-count">
+                    <strong>{{ items.count|default:0 }}</strong> items found
+                    {% if request.GET.q %}
+                        for "<strong>{{ request.GET.q }}</strong>"
+                    {% endif %}
+                </div>
+                <div class="view-toggle">
+                    <button class="btn view-btn active" data-view="grid">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="btn view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Loading items...</p>
+            </div>
+
+            <!-- Items Grid -->
+            <div class="items-grid" id="itemsContainer">
+                {% if items %}
+                    {% for item in items %}
+                        <div class="auction-card" data-item-id="{{ item.pk }}">
+                            <div class="auction-image">
+                                <img src="{{ item.image.url|default:'/static/images/no-image.png' }}" alt="{{ item.title }}">
+                                {% if item.is_featured %}
+                                    <div class="auction-badge featured">Featured</div>
+                                {% elif item.is_ending_soon %}
+                                    <div class="auction-badge ending-soon">Ending Soon</div>
+                                {% elif item.is_new %}
+                                    <div class="auction-badge new">New</div>
+                                {% endif %}
+                            </div>
+                            <div class="auction-content">
+                                <a href="{% url 'auctions:item_detail' item.pk %}" class="auction-title">
+                                    {{ item.title }}
+                                </a>
+                                <p class="auction-description">{{ item.description|truncatewords:20 }}</p>
+                                <div class="auction-meta">
+                                    <a href="{% url 'auctions:category' item.category.pk %}" class="auction-category">
+                                        {{ item.category.name }}
+                                    </a>
+                                    <div class="auction-seller">
+                                        <img src="{{ item.seller.avatar.url|default:'/static/images/default-avatar.png' }}"
+                                             alt="{{ item.seller.username }}" class="seller-avatar">
+                                        <a href="#" class="seller-name">{{ item.seller.username }}</a>
+                                    </div>
+                                </div>
+                                <div class="auction-info">
+                                    <div>
+                                        <div class="current-bid">${{ item.current_bid|floatformat:2 }}</div>
+                                        <div class="bid-count">{{ item.bid_count }} bid{{ item.bid_count|pluralize }}</div>
+                                    </div>
+                                    <div class="bid-info">
+                                        <div class="time-left {% if item.is_ending_soon %}ending-soon{% elif item.is_ended %}ended{% endif %}">
+                                            <i class="fas fa-clock"></i>
+                                            {% if item.is_ended %}
+                                                Ended
+                                            {% else %}
+                                                {{ item.time_left }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="auction-footer">
+                                {% if item.is_ended %}
+                                    <span class="bid-btn disabled">Auction Ended</span>
+                                {% else %}
+                                    <a href="{% url 'auctions:item_detail' item.pk %}" class="bid-btn">
+                                        <i class="fas fa-gavel me-2"></i>Place Bid
+                                    </a>
+                                {% endif %}
+                                <button class="watch-btn" onclick="toggleWatch({{ item.pk }}, this)" title="Add to Watchlist">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            <h3>No items found</h3>
+                            <p>Try adjusting your search or filters</p>
+                            <a href="{% url 'auctions:items' %}" class="btn btn-primary">
+                                View All Items
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            {% if items.has_other_pages %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        {% if items.has_previous %}
+                            <a href="?page={{ items.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-link">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+
+                        {% for num in items.paginator.page_range %}
+                            {% if items.number == num %}
+                                <span class="page-link active">{{ num }}</span>
+                            {% elif num > items.number|add:'-3' and num < items.number|add:'3' %}
+                                <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-link">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if items.has_next %}
+                            <a href="?page={{ items.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="page-link">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="sidebar">
+                <h5>Categories</h5>
+                <div class="list-group">
+                    {% for category in categories %}
+                        <div class="list-group-item">
+                            <a href="?category={{ category.pk }}">{{ category.name }}</a>
+                            <span class="badge">{{ category.item_count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <hr>
+
+                <h5>Price Range</h5>
+                <div class="price-range">
+                    <label for="priceRange">Max Price: $<span id="priceValue">1000</span></label>
+                    <input type="range" id="priceRange" min="0" max="10000" value="1000" step="50" class="form-range">
+                    <div class="price-display">
+                        <span>$0</span>
+                        <span>$10,000</span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h5>Quick Filters</h5>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <a href="?status=ending_soon">Ending Soon</a>
+                    </div>
+                    <div class="list-group-item">
+                        <a href="?status=new">New Today</a>
+                    </div>
+                    <div class="list-group-item">
+                        <a href="?sort=price_low">Under $100</a>
+                    </div>
+                    <div class="list-group-item">
+                        <a href="?featured=true">Featured Items</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const itemsContainer = document.getElementById('itemsContainer');
+    const viewBtns = document.querySelectorAll('.view-btn');
+    const priceRange = document.getElementById('priceRange');
+    const priceValue = document.getElementById('priceValue');
+
+    // Auto-submit form when filters change
+    searchForm.addEventListener('change', function(e) {
+        if (e.target.matches('select')) {
+            showLoading();
+            this.submit();
+        }
+    });
+
+    // View toggle functionality
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+
+            // Update active button
+            viewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            // Update container class
+            if (view === 'list') {
+                itemsContainer.className = 'items-list';
+                document.querySelectorAll('.auction-card').forEach(card => {
+                    card.classList.add('list-view');
+                });
+            } else {
+                itemsContainer.className = 'items-grid';
+                document.querySelectorAll('.auction-card').forEach(card => {
+                    card.classList.remove('list-view');
+                });
+            }
+
+            // Save preference
+            localStorage.setItem('itemsView', view);
+        });
+    });
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('itemsView');
+    if (savedView) {
+        const savedBtn = document.querySelector(`[data-view="${savedView}"]`);
+        if (savedBtn) {
+            savedBtn.click();
+        }
+    }
+
+    // Price range slider
+    if (priceRange) {
+        priceRange.addEventListener('input', function() {
+            priceValue.textContent = this.value;
+        });
+
+        priceRange.addEventListener('change', function() {
+            // Add price filter to URL
+            const url = new URL(window.location);
+            url.searchParams.set('max_price', this.value);
+            showLoading();
+            window.location.href = url.toString();
+        });
+    }
+
+    // Watch functionality
+    window.toggleWatch = function(itemId, button) {
+        const icon = button.querySelector('i');
+        const isWatching = button.classList.contains('watching');
+
+        // Show loading state
+        icon.className = 'fas fa-spinner fa-spin';
+        button.disabled = true;
+
+        // Make API call
+        fetch(`/api/auctions/items/${itemId}/watch/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: isWatching ? 'unwatch' : 'watch'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.watching) {
+                    button.classList.add('watching');
+                    button.title = 'Remove from Watchlist';
+                    icon.className = 'fas fa-heart';
+                } else {
+                    button.classList.remove('watching');
+                    button.title = 'Add to Watchlist';
+                    icon.className = 'fas fa-heart';
+                }
+
+                // Show success message
+                showToast(data.message, 'success');
+            } else {
+                showToast(data.message || 'Error updating watchlist', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error updating watchlist', 'error');
+        })
+        .finally(() => {
+            if (!button.classList.contains('watching')) {
+                icon.className = 'fas fa-heart';
+            }
+            button.disabled = false;
+        });
+    };
+
+    // Show loading state
+    function showLoading() {
+        loadingSpinner.classList.add('active');
+        itemsContainer.style.opacity = '0.5';
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} alert-dismissible fade show`;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        `;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+
+    // Live updates for auction times
+    setInterval(function() {
+        document.querySelectorAll('.time-left').forEach(timeElement => {
+            const itemId = timeElement.closest('.auction-card').dataset.itemId;
+            // Here you would fetch updated time from API
+            // For now, we'll skip this to avoid too many requests
+        });
+    }, 60000); // Update every minute
+
+    // Infinite scroll (optional)
+    let loading = false;
+    window.addEventListener('scroll', function() {
+        if (loading) return;
+
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        if (scrollTop + windowHeight >= documentHeight - 1000) {
+            // Load more items
+            loading = true;
+            // Implementation would go here
+        }
+    });
+});
+</script>
+{% endblock %}

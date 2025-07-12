@@ -1,271 +1,229 @@
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.utils import timezone
-from rest_framework import status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.core.paginator import Paginator
-from django.db.models import Q, Count, Max
-from decimal import Decimal
-import logging
+from django.shortcuts import render  # type: ignore
+from django.http import JsonResponse  # type: ignore
+from django.utils import timezone  # type: ignore
+from rest_framework import status  # type: ignore
+from rest_framework.views import APIView  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework.decorators import api_view, permission_classes  # type: ignore
+from rest_framework.permissions import AllowAny, IsAuthenticated  # type: ignore
 
-logger = logging.getLogger(__name__)
+# ──────────────────────────────────────────────────────────────────────────────
+# Web views
+# ──────────────────────────────────────────────────────────────────────────────
 
-# Basic placeholder views for auction functionality
-# These are minimal implementations to get Django running
+def home_view(request):
+    """Home page view."""
+    return render(request, 'base.html', {'page_title': 'Home'})
+
+def create_item_view(request):
+    """Page for creating a new auction item."""
+    return render(request, 'create_item.html', {'page_title': 'Create Item'})
+
+def item_detail_view(request, pk):
+    """Detail view for a single auction item."""
+    return render(request, 'item_detail.html', {'page_title': 'Item Detail', 'item_id': pk})
+
+def search_view(request):
+    """Search page for auction items."""
+    return render(request, 'search.html', {'page_title': 'Search'})
+
+# ──────────────────────────────────────────────────────────────────────────────
+# REST API views
+# ──────────────────────────────────────────────────────────────────────────────
 
 class AuctionItemListAPIView(APIView):
-    """List all auction items"""
+    """List all auction items."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0,
-            'next': None,
-            'previous': None
-        })
+        # Placeholder implementation
+        return Response({'items': [], 'count': 0, 'next': None, 'previous': None})
 
 class AuctionItemCreateAPIView(APIView):
-    """Create new auction item"""
+    """Create a new auction item."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        return Response({
-            'message': 'Auction creation not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Create auction item not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class AuctionItemDetailAPIView(APIView):
-    """Get auction item details"""
+    """Retrieve details of a specific auction item."""
     permission_classes = [AllowAny]
 
-    def get(self, request, pk=None, slug=None):
-        return Response({
-            'message': 'Item not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, pk):
+        return Response({'message': f'Details for item {pk} not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class AuctionItemUpdateAPIView(APIView):
-    """Update auction item"""
+    """Update an existing auction item."""
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
-        return Response({
-            'message': 'Update not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Update auction item not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class AuctionItemDeleteAPIView(APIView):
-    """Delete auction item"""
+    """Delete an auction item."""
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        return Response({
-            'message': 'Delete not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Delete auction item not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class PlaceBidAPIView(APIView):
-    """Place bid on auction item"""
+    """Place a bid on an auction item."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Bidding not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Place bid not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class ItemBidsAPIView(APIView):
-    """Get bids for auction item"""
+    """List all bids for a given auction item."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'bids': [],
-            'count': 0
-        })
+        return Response({'bids': [], 'count': 0})
 
 class BidDetailAPIView(APIView):
-    """Get bid details"""
+    """Retrieve details of a specific bid."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        return Response({
-            'message': 'Bid not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Bid detail not yet implemented'},
+                        status=status.HTTP_404_NOT_FOUND)
 
 class UserItemsAPIView(APIView):
-    """Get user's auction items"""
+    """List items belonging to the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class UserBidsAPIView(APIView):
-    """Get user's bids"""
+    """List bids placed by the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'bids': [],
-            'count': 0
-        })
+        return Response({'bids': [], 'count': 0})
 
 class UserWinsAPIView(APIView):
-    """Get user's won auctions"""
+    """List auctions won by the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class UserSellingAPIView(APIView):
-    """Get user's items being sold"""
+    """List items currently being sold by the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class WatchlistAPIView(APIView):
-    """Get user's watchlist"""
+    """List items in the authenticated user's watchlist."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class ToggleWatchAPIView(APIView):
-    """Toggle item in watchlist"""
+    """Add/remove an item from the user's watchlist."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Watchlist toggle not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Toggle watch not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class WatchingItemsAPIView(APIView):
-    """Get items user is watching"""
+    """List items the user is watching."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class CategoryListAPIView(APIView):
-    """List all categories"""
+    """List all categories."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'categories': [],
-            'count': 0
-        })
+        return Response({'categories': [], 'count': 0})
 
 class CategoryDetailAPIView(APIView):
-    """Get category details"""
+    """Retrieve details for a specific category."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk=None, slug=None):
-        return Response({
-            'message': 'Category not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Category detail not yet implemented'},
+                        status=status.HTTP_404_NOT_FOUND)
 
 class CategoryItemsAPIView(APIView):
-    """Get items in category"""
+    """List items within a specific category."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class ItemCommentsAPIView(APIView):
-    """Get comments for item"""
+    """List comments for a specific auction item."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'comments': [],
-            'count': 0
-        })
+        return Response({'comments': [], 'count': 0})
 
 class CommentCreateAPIView(APIView):
-    """Create comment"""
+    """Create a new comment on an item."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        return Response({
-            'message': 'Comments not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Create comment not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class CommentDetailAPIView(APIView):
-    """Get comment details"""
+    """Retrieve details for a specific comment."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'message': 'Comment not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Comment detail not yet implemented'},
+                        status=status.HTTP_404_NOT_FOUND)
 
 class CommentReplyAPIView(APIView):
-    """Reply to comment"""
+    """Reply to a specific comment."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Comment replies not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Reply comment not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class SearchItemsAPIView(APIView):
-    """Search auction items"""
+    """Search for auction items."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0,
-            'query': request.GET.get('q', '')
-        })
+        return Response({'items': [], 'count': 0, 'query': request.GET.get('q', '')})
 
 class FilterItemsAPIView(APIView):
-    """Filter auction items"""
+    """Filter auction items by given parameters."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0,
-            'filters': dict(request.GET)
-        })
+        return Response({'items': [], 'count': 0, 'filters': dict(request.GET)})
 
 class SavedSearchAPIView(APIView):
-    """Manage saved searches"""
+    """Manage saved searches for the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'searches': [],
-            'count': 0
-        })
+        return Response({'searches': [], 'count': 0})
 
     def post(self, request):
-        return Response({
-            'message': 'Saved searches not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Saved search not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class AuctionStatisticsAPIView(APIView):
-    """Get auction statistics"""
+    """Retrieve overall auction statistics."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -277,146 +235,123 @@ class AuctionStatisticsAPIView(APIView):
         })
 
 class TrendingItemsAPIView(APIView):
-    """Get trending items"""
+    """List trending auction items."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class FeaturedItemsAPIView(APIView):
-    """Get featured items"""
+    """List featured auction items."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            'items': [],
-            'count': 0
-        })
+        return Response({'items': [], 'count': 0})
 
 class EndAuctionAPIView(APIView):
-    """End auction early"""
+    """End an auction early."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'End auction not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'End auction not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class ExtendAuctionAPIView(APIView):
-    """Extend auction time"""
+    """Extend the time of an auction."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Extend auction not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Extend auction not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class CancelAuctionAPIView(APIView):
-    """Cancel auction"""
+    """Cancel an ongoing auction."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Cancel auction not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Cancel auction not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class ReportItemAPIView(APIView):
-    """Report auction item"""
+    """Report an auction item."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Reporting not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Report item not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class UserReportsAPIView(APIView):
-    """Get user's reports"""
+    """List reports filed by the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'reports': [],
-            'count': 0
-        })
+        return Response({'reports': [], 'count': 0})
 
 class ItemImagesAPIView(APIView):
-    """Manage item images"""
+    """Manage images for a specific auction item."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        return Response({
-            'images': [],
-            'count': 0
-        })
+        return Response({'images': [], 'count': 0})
 
     def post(self, request, pk):
-        return Response({
-            'message': 'Image upload not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Upload image not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class ImageDetailAPIView(APIView):
-    """Get image details"""
+    """Retrieve details of a specific image."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'message': 'Image not found'
-        }, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Image detail not yet implemented'},
+                        status=status.HTTP_404_NOT_FOUND)
 
 class DeleteImageAPIView(APIView):
-    """Delete image"""
+    """Delete a specific image."""
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-        return Response({
-            'message': 'Image deletion not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Delete image not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class AuctionHistoryAPIView(APIView):
-    """Get auction history"""
+    """Retrieve bid history for a specific auction item."""
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        return Response({
-            'history': [],
-            'count': 0
-        })
+        return Response({'history': [], 'count': 0})
 
 class UserAuctionHistoryAPIView(APIView):
-    """Get user's auction history"""
+    """Retrieve past auction history for the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({
-            'history': [],
-            'count': 0
-        })
+        return Response({'history': [], 'count': 0})
 
 class BulkWatchAPIView(APIView):
-    """Bulk add to watchlist"""
+    """Add multiple items to watchlist."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        return Response({
-            'message': 'Bulk watch not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Bulk watch not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class BulkUnwatchAPIView(APIView):
-    """Bulk remove from watchlist"""
+    """Remove multiple items from watchlist."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        return Response({
-            'message': 'Bulk unwatch not yet implemented'
-        }, status=status.HTTP_501_NOT_IMPLEMENTED)
+        return Response({'message': 'Bulk unwatch not yet implemented'},
+                        status=status.HTTP_501_NOT_IMPLEMENTED)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Health check endpoint
+# ──────────────────────────────────────────────────────────────────────────────
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def auction_health_check(request):
-    """Health check for auction service"""
+    """Health check for the auctions service."""
     return JsonResponse({
         'status': 'healthy',
         'service': 'auctions',

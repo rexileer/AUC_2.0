@@ -1,0 +1,1178 @@
+{% extends 'base.html' %} {% load static %} {% block title %}{{ item.title }} -
+AUC 2.0{% endblock %} {% block extra_css %}
+<style>
+    .item-detail-container {
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .item-images {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .main-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .thumbnail-images {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: #007bff;
+        transform: scale(1.05);
+    }
+
+    .item-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    .item-badge.featured {
+        background: #ffd93d;
+        color: #333;
+    }
+
+    .item-badge.ending-soon {
+        background: #ff6b6b;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .item-info {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .item-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .item-meta {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+    }
+
+    .meta-item i {
+        color: #007bff;
+    }
+
+    .item-description {
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 2rem;
+    }
+
+    .bid-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .current-bid {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #28a745;
+        margin-bottom: 0.5rem;
+    }
+
+    .bid-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .bid-count {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .time-left {
+        font-size: 1.2rem;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .time-left.ending-soon {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .time-left.ended {
+        color: #6c757d;
+    }
+
+    .countdown {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 1rem 0;
+    }
+
+    .countdown-item {
+        text-align: center;
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        min-width: 80px;
+    }
+
+    .countdown-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .countdown-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .bid-form {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .bid-input {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .bid-input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .bid-btn {
+        padding: 1rem 2rem;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .bid-btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    .bid-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .quick-bid-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .quick-bid-btn {
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .quick-bid-btn:hover {
+        background: #e9ecef;
+        border-color: #007bff;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .watch-btn {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .watch-btn:hover,
+    .watch-btn.watching {
+        background: #dc3545;
+        color: white;
+    }
+
+    .share-btn {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .share-btn:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    .seller-info {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .seller-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .seller-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .seller-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+
+    .seller-rating {
+        color: #ffc107;
+        margin-top: 0.25rem;
+    }
+
+    .seller-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .seller-stat {
+        text-align: center;
+    }
+
+    .seller-stat h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+
+    .seller-stat p {
+        color: #666;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .bid-history {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .bid-history h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .bid-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .bid-item:last-child {
+        border-bottom: none;
+    }
+
+    .bid-user {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .bid-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .bid-username {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .bid-amount {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    .bid-time {
+        color: #666;
+        font-size: 0.9rem;
+        text-align: right;
+    }
+
+    .comments-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .comment-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .comment-form textarea {
+        width: 100%;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .comment-form textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
+    .comment-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .comment-username {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .comment-time {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .comment-text {
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .similar-items {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .similar-items h3 {
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .similar-item {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .similar-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .similar-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .similar-item-info {
+        padding: 1rem;
+    }
+
+    .similar-item-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .similar-item-price {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    @media (max-width: 768px) {
+        .item-title {
+            font-size: 1.8rem;
+        }
+
+        .current-bid {
+            font-size: 2rem;
+        }
+
+        .countdown {
+            gap: 0.5rem;
+        }
+
+        .countdown-item {
+            min-width: 60px;
+            padding: 0.75rem;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+        }
+
+        .bid-form {
+            flex-direction: column;
+        }
+
+        .quick-bid-buttons {
+            flex-wrap: wrap;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .seller-stats {
+            gap: 1rem;
+        }
+
+        .similar-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="container item-detail-container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Item Images -->
+            <div class="item-images">
+                <img
+                    src="{{ item.main_image.url|default:'/static/images/no-image.png' }}"
+                    alt="{{ item.title }}"
+                    class="main-image"
+                    id="mainImage"
+                />
+
+                {% if item.is_featured %}
+                <div class="item-badge featured">Featured</div>
+                {% elif item.is_ending_soon %}
+                <div class="item-badge ending-soon">Ending Soon</div>
+                {% endif %} {% if item.images.count > 1 %}
+                <div class="thumbnail-images">
+                    {% for image in item.images.all %}
+                    <img
+                        src="{{ image.url }}"
+                        alt="{{ item.title }}"
+                        class="thumbnail {% if forloop.first %}active{% endif %}"
+                        onclick="changeMainImage(this)"
+                    />
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Item Information -->
+            <div class="item-info">
+                <h1 class="item-title">{{ item.title }}</h1>
+
+                <div class="item-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span>{{ item.category.name }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ item.location|default:"Not specified" }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Listed {{ item.created_at|timesince }} ago</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-eye"></i>
+                        <span>{{ item.view_count }} views</span>
+                    </div>
+                </div>
+
+                <div class="item-description">
+                    {{ item.description|linebreaks }}
+                </div>
+
+                {% if item.specifications %}
+                <div class="specifications">
+                    <h4>Specifications</h4>
+                    <ul>
+                        {% for spec in item.specifications %}
+                        <li>
+                            <strong>{{ spec.name }}:</strong> {{ spec.value }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3>
+                    <i class="fas fa-comments me-2"></i>Questions & Comments
+                </h3>
+
+                {% if user.is_authenticated %}
+                <div class="comment-form">
+                    <form
+                        method="post"
+                        action="{% url 'auctions:add_comment' item.pk %}"
+                    >
+                        {% csrf_token %}
+                        <textarea
+                            name="comment"
+                            placeholder="Ask a question or leave a comment..."
+                        ></textarea>
+                        <button type="submit" class="btn btn-primary mt-2">
+                            <i class="fas fa-paper-plane me-2"></i>Post Comment
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <a href="{% url 'accounts_web:login' %}">Login</a> to ask
+                    questions or leave comments.
+                </div>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in item.comments.all %}
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <img
+                                src="{{ comment.user.avatar.url|default:'/static/images/default-avatar.png' }}"
+                                alt="{{ comment.user.username }}"
+                                class="comment-avatar"
+                            />
+                            <strong class="comment-username"
+                                >{{ comment.user.username }}</strong
+                            >
+                            <span class="comment-time"
+                                >{{ comment.created_at|timesince }} ago</span
+                            >
+                        </div>
+                        <div class="comment-text">
+                            {{ comment.text|linebreaks }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">
+                        No comments yet. Be the first to ask a question!
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Bidding Section -->
+            <div class="bid-section">
+                <div class="current-bid">
+                    ${{ item.current_bid|floatformat:2 }}
+                </div>
+                <div class="bid-info">
+                    <span class="bid-count"
+                        >{{ item.bid_count }} bid{{ item.bid_count|pluralize
+                        }}</span
+                    >
+                    <div
+                        class="time-left {% if item.is_ending_soon %}ending-soon{% elif item.is_ended %}ended{% endif %}"
+                    >
+                        <i class="fas fa-clock"></i>
+                        {% if item.is_ended %} Ended {% else %}
+                        <span id="timeLeft">{{ item.time_left }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if not item.is_ended %}
+                <div class="countdown" id="countdown">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="days">0</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="hours">0</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="minutes">0</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="seconds">0</div>
+                        <div class="countdown-label">Seconds</div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                <div class="quick-bid-buttons">
+                    <button
+                        class="quick-bid-btn"
+                        onclick="setQuickBid({{ item.current_bid|add:1 }})"
+                    >
+                        +$1
+                    </button>
+                    <button
+                        class="quick-bid-btn"
+                        onclick="setQuickBid({{ item.current_bid|add:5 }})"
+                    >
+                        +$5
+                    </button>
+                    <button
+                        class="quick-bid-btn"
+                        onclick="setQuickBid({{ item.current_bid|add:10 }})"
+                    >
+                        +$10
+                    </button>
+                    <button
+                        class="quick-bid-btn"
+                        onclick="setQuickBid({{ item.current_bid|add:25 }})"
+                    >
+                        +$25
+                    </button>
+                </div>
+
+                <form
+                    class="bid-form"
+                    method="post"
+                    action="{% url 'auctions:place_bid' item.pk %}"
+                >
+                    {% csrf_token %}
+                    <input
+                        type="number"
+                        name="amount"
+                        class="bid-input"
+                        placeholder="Enter bid amount"
+                        min="{{ item.current_bid|add:1 }}"
+                        step="0.01"
+                        id="bidAmount"
+                        required
+                    />
+                    <button type="submit" class="bid-btn">
+                        <i class="fas fa-gavel me-2"></i>Place Bid
+                    </button>
+                </form>
+
+                <div class="action-buttons">
+                    <button
+                        class="watch-btn"
+                        onclick="toggleWatch({{ item.pk }}, this)"
+                    >
+                        <i class="fas fa-heart me-2"></i>
+                        <span>Add to Watchlist</span>
+                    </button>
+                    <button class="share-btn" onclick="shareItem()">
+                        <i class="fas fa-share me-2"></i>Share
+                    </button>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <a href="{% url 'accounts_web:login' %}">Login</a> to place
+                    bids
+                </div>
+                {% endif %} {% else %}
+                <div class="alert alert-secondary">
+                    <i class="fas fa-clock me-2"></i>This auction has ended
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Seller Information -->
+            <div class="seller-info">
+                <div class="seller-header">
+                    <img
+                        src="{{ item.seller.avatar.url|default:'/static/images/default-avatar.png' }}"
+                        alt="{{ item.seller.username }}"
+                        class="seller-avatar"
+                    />
+                    <div>
+                        <h4 class="seller-name">{{ item.seller.username }}</h4>
+                        <div class="seller-rating">
+                            {% for i in "12345" %}
+                            <i class="fas fa-star"></i>
+                            {% endfor %}
+                            <span
+                                >({{ item.seller.rating|default:"5.0" }})</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seller-stats">
+                    <div class="seller-stat">
+                        <h4>{{ item.seller.items_sold|default:"0" }}</h4>
+                        <p>Items Sold</p>
+                    </div>
+                    <div class="seller-stat">
+                        <h4>
+                            {{ item.seller.positive_feedback|default:"100" }}%
+                        </h4>
+                        <p>Positive</p>
+                    </div>
+                    <div class="seller-stat">
+                        <h4>{{ item.seller.member_since|date:"Y" }}</h4>
+                        <p>Member Since</p>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <a href="#" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-user me-2"></i>View Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bid History -->
+            <div class="bid-history">
+                <h3><i class="fas fa-history me-2"></i>Bid History</h3>
+                <div class="bid-history-list">
+                    {% for bid in item.bids.all|slice:":10" %}
+                    <div class="bid-item">
+                        <div class="bid-user">
+                            <img
+                                src="{{ bid.user.avatar.url|default:'/static/images/default-avatar.png' }}"
+                                alt="{{ bid.user.username }}"
+                                class="bid-avatar"
+                            />
+                            <span class="bid-username"
+                                >{{ bid.user.username }}</span
+                            >
+                        </div>
+                        <div class="bid-details">
+                            <div class="bid-amount">
+                                ${{ bid.amount|floatformat:2 }}
+                            </div>
+                            <div class="bid-time">
+                                {{ bid.created_at|timesince }} ago
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No bids yet. Be the first to bid!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Items -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="similar-items">
+                <h3><i class="fas fa-search me-2"></i>Similar Items</h3>
+                <div class="similar-grid">
+                    {% for similar in similar_items %}
+                    <a
+                        href="{% url 'auctions:item_detail' similar.pk %}"
+                        class="similar-item"
+                    >
+                        <img
+                            src="{{ similar.main_image.url|default:'/static/images/no-image.png' }}"
+                            alt="{{ similar.title }}"
+                        />
+                        <div class="similar-item-info">
+                            <div class="similar-item-title">
+                                {{ similar.title }}
+                            </div>
+                            <div class="similar-item-price">
+                                ${{ similar.current_bid|floatformat:2 }}
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">No similar items found.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Countdown timer
+        const endDate = new Date('{{ item.end_date|date:"c" }}');
+
+        function updateCountdown() {
+            const now = new Date();
+            const timeLeft = endDate - now;
+
+            if (timeLeft <= 0) {
+                document.getElementById("countdown").innerHTML =
+                    '<div class="alert alert-danger">Auction Ended</div>';
+                return;
+            }
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor(
+                (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+            );
+            const minutes = Math.floor(
+                (timeLeft % (1000 * 60 * 60)) / (1000 * 60),
+            );
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById("days").textContent = days;
+            document.getElementById("hours").textContent = hours;
+            document.getElementById("minutes").textContent = minutes;
+            document.getElementById("seconds").textContent = seconds;
+        }
+
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Image gallery
+        window.changeMainImage = function (thumbnail) {
+            document.getElementById("mainImage").src = thumbnail.src;
+            document.querySelectorAll(".thumbnail").forEach((thumb) => {
+                thumb.classList.remove("active");
+            });
+            thumbnail.classList.add("active");
+        };
+
+        // Quick bid functionality
+        window.setQuickBid = function (amount) {
+            document.getElementById("bidAmount").value = amount;
+        };
+
+        // Watch functionality
+        window.toggleWatch = function (itemId, button) {
+            const span = button.querySelector("span");
+            const icon = button.querySelector("i");
+            const isWatching = button.classList.contains("watching");
+
+            // Show loading state
+            icon.className = "fas fa-spinner fa-spin me-2";
+            button.disabled = true;
+
+            fetch(`/api/auctions/items/${itemId}/watch/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    action: isWatching ? "unwatch" : "watch",
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        if (data.watching) {
+                            button.classList.add("watching");
+                            span.textContent = "Remove from Watchlist";
+                            icon.className = "fas fa-heart me-2";
+                        } else {
+                            button.classList.remove("watching");
+                            span.textContent = "Add to Watchlist";
+                            icon.className = "fas fa-heart me-2";
+                        }
+                        showToast(data.message, "success");
+                    } else {
+                        showToast(
+                            data.message || "Error updating watchlist",
+                            "error",
+                        );
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    showToast("Error updating watchlist", "error");
+                })
+                .finally(() => {
+                    icon.className = "fas fa-heart me-2";
+                    button.disabled = false;
+                });
+        };
+
+        // Share functionality
+        window.shareItem = function () {
+            if (navigator.share) {
+                navigator.share({
+                    title: "{{ item.title }}",
+                    text: "Check out this auction item!",
+                    url: window.location.href,
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast("Link copied to clipboard!", "success");
+                });
+            }
+        };
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + "=") {
+                        cookieValue = decodeURIComponent(
+                            cookie.substring(name.length + 1),
+                        );
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Show toast notification
+        function showToast(message, type = "info") {
+            const toast = document.createElement("div");
+            toast.className = `alert alert-${type} alert-dismissible fade show`;
+            toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        `;
+            toast.innerHTML = `
+            <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // Auto-refresh bid information every 30 seconds
+        setInterval(function () {
+            fetch(`/api/auctions/items/{{ item.pk }}/`)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.current_bid) {
+                        document.querySelector(".current-bid").textContent =
+                            "$" + parseFloat(data.current_bid).toFixed(2);
+                    }
+                    if (data.bid_count !== undefined) {
+                        document.querySelector(".bid-count").textContent =
+                            data.bid_count +
+                            " bid" +
+                            (data.bid_count !== 1 ? "s" : "");
+                    }
+                })
+                .catch((error) =>
+                    console.error("Error refreshing bid info:", error),
+                );
+        }, 30000);
+
+        // Bid form validation
+        const bidForm = document.querySelector(".bid-form");
+        if (bidForm) {
+            bidForm.addEventListener("submit", function (e) {
+                const bidAmount = parseFloat(
+                    document.getElementById("bidAmount").value,
+                );
+                const currentBid = parseFloat("{{ item.current_bid }}");
+
+                if (bidAmount <= currentBid) {
+                    e.preventDefault();
+                    showToast(
+                        "Your bid must be higher than the current bid!",
+                        "error",
+                    );
+                    return;
+                }
+
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML =
+                    '<i class="fas fa-spinner fa-spin me-2"></i>Placing Bid...';
+                submitBtn.disabled = true;
+
+                // Re-enable button after 5 seconds as fallback
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 5000);
+            });
+        }
+
+        // Main image click for zoom
+        document
+            .getElementById("mainImage")
+            .addEventListener("click", function () {
+                const modal = document.createElement("div");
+                modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            cursor: pointer;
+        `;
+
+                const img = document.createElement("img");
+                img.src = this.src;
+                img.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        `;
+
+                modal.appendChild(img);
+                document.body.appendChild(modal);
+
+                modal.addEventListener("click", function () {
+                    document.body.removeChild(modal);
+                });
+            });
+    });
+</script>
+{% endblock %}

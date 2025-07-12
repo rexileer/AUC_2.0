@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - AUC 2.0{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-container {
+    margin-top: 2rem;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+.dashboard-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stats-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.stats-card h3 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.stats-card p {
+    color: #6c757d;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+.stats-card.primary { border-left: 4px solid #007bff; }
+.stats-card.success { border-left: 4px solid #28a745; }
+.stats-card.warning { border-left: 4px solid #ffc107; }
+.stats-card.info { border-left: 4px solid #17a2b8; }
+.stats-card.danger { border-left: 4px solid #dc3545; }
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #495057;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.quick-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+    transform: translateY(-2px);
+}
+
+.quick-action-btn i {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+.activity-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.activity-card .card-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
+.activity-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.activity-content p {
+    margin: 0.25rem 0 0 0;
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+.balance-display {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.balance-display h3 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+
+.balance-display p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+}
+
+.notification-item {
+    background: white;
+    border-left: 4px solid #007bff;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.notification-item.unread {
+    background: #f8f9ff;
+    border-left-color: #007bff;
+}
+
+.notification-item.success {
+    border-left-color: #28a745;
+}
+
+.notification-item.warning {
+    border-left-color: #ffc107;
+}
+
+.notification-item.danger {
+    border-left-color: #dc3545;
+}
+
+.notification-item h6 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.notification-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.notification-item small {
+    color: #adb5bd;
+    font-size: 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.progress-thin {
+    height: 8px;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-card {
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
+                <p>Here's what's happening with your auctions today</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="balance-display">
+                    <h3>${{ user.balance|floatformat:2 }}</h3>
+                    <p>Current Balance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card primary">
+                <div class="card-icon text-primary">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <h3>{{ user_stats.active_bids|default:0 }}</h3>
+                <p>Active Bids</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card success">
+                <div class="card-icon text-success">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3>{{ user_stats.won_auctions|default:0 }}</h3>
+                <p>Won Auctions</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card warning">
+                <div class="card-icon text-warning">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3>{{ user_stats.selling_items|default:0 }}</h3>
+                <p>Items Selling</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card info">
+                <div class="card-icon text-info">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3>{{ user_stats.watching_items|default:0 }}</h3>
+                <p>Watching Items</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'auctions:create_item' %}" class="quick-action-btn">
+            <i class="fas fa-plus"></i>
+            Create Auction
+        </a>
+        <a href="{% url 'auctions:items' %}" class="quick-action-btn">
+            <i class="fas fa-search"></i>
+            Browse Auctions
+        </a>
+        <a href="{% url 'accounts_web:balance' %}" class="quick-action-btn">
+            <i class="fas fa-wallet"></i>
+            Add Funds
+        </a>
+        <a href="{% url 'auctions:watchlist' %}" class="quick-action-btn">
+            <i class="fas fa-heart"></i>
+            Watchlist
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-lg-8 mb-4">
+            <div class="activity-card">
+                <div class="card-header">
+                    <i class="fas fa-clock me-2"></i>Recent Activity
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_activities %}
+                        {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-icon bg-{{ activity.type|default:'primary' }}">
+                                    <i class="fas fa-{{ activity.icon|default:'bell' }}"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h6>{{ activity.title }}</h6>
+                                    <p>{{ activity.description }}</p>
+                                </div>
+                                <div class="activity-time">
+                                    {{ activity.created_at|timesince }} ago
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="activity-item">
+                            <div class="activity-icon bg-secondary">
+                                <i class="fas fa-info"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>No recent activity</h6>
+                                <p>Start bidding or create an auction to see your activity here</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'accounts_web:activity' %}" class="btn btn-outline-primary btn-sm">
+                        View All Activity
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Notifications -->
+            <div class="activity-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-bell me-2"></i>Recent Notifications
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_notifications %}
+                        {% for notification in recent_notifications %}
+                            <div class="notification-item {% if not notification.is_read %}unread{% endif %} {{ notification.type }}">
+                                <h6>{{ notification.title }}</h6>
+                                <p>{{ notification.message|truncatewords:15 }}</p>
+                                <small>{{ notification.created_at|timesince }} ago</small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="notification-item">
+                            <h6>No new notifications</h6>
+                            <p>You're all caught up!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'notifications_web:list' %}" class="btn btn-outline-primary btn-sm">
+                        View All Notifications
+                    </a>
+                </div>
+            </div>
+
+            <!-- Ending Soon -->
+            <div class="activity-card">
+                <div class="card-header">
+                    <i class="fas fa-clock me-2"></i>Ending Soon
+                </div>
+                <div class="card-body">
+                    {% if ending_soon_items %}
+                        {% for item in ending_soon_items %}
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ item.image.url|default:'/static/images/no-image.png' }}"
+                                     alt="{{ item.title }}"
+                                     class="rounded me-3"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ item.title|truncatechars:30 }}</h6>
+                                    <small class="text-muted">
+                                        Ends in {{ item.end_date|timeuntil }}
+                                    </small>
+                                    <div class="progress progress-thin mt-1">
+                                        <div class="progress-bar bg-warning"
+                                             style="width: {{ item.time_left_percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No auctions ending soon</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'auctions:ending_soon' %}" class="btn btn-outline-warning btn-sm">
+                        View All Ending Soon
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bids Table -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="activity-card">
+                <div class="card-header">
+                    <i class="fas fa-hand-paper me-2"></i>My Recent Bids
+                </div>
+                <div class="card-body">
+                    {% if recent_bids %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>My Bid</th>
+                                        <th>Current Bid</th>
+                                        <th>Status</th>
+                                        <th>Ends</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bid in recent_bids %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="{{ bid.item.image.url|default:'/static/images/no-image.png' }}"
+                                                         alt="{{ bid.item.title }}"
+                                                         class="rounded me-2"
+                                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 class="mb-0">{{ bid.item.title|truncatechars:30 }}</h6>
+                                                        <small class="text-muted">{{ bid.item.category }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>${{ bid.amount }}</td>
+                                            <td>${{ bid.item.current_bid }}</td>
+                                            <td>
+                                                {% if bid.is_winning %}
+                                                    <span class="badge bg-success badge-status">Winning</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger badge-status">Outbid</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ bid.item.end_date|timeuntil }}</td>
+                                            <td>
+                                                <a href="{% url 'auctions:item_detail' bid.item.pk %}"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-hand-paper fa-3x text-muted mb-3"></i>
+                            <h5>No recent bids</h5>
+                            <p class="text-muted">Start bidding on items to see them here</p>
+                            <a href="{% url 'auctions:items' %}" class="btn btn-primary">
+                                Browse Auctions
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'auctions:my_bids' %}" class="btn btn-outline-primary btn-sm">
+                        View All My Bids
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(function() {
+        // Update notification count
+        fetch('/api/notifications/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('notification-count');
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error updating notifications:', error));
+
+        // Update balance
+        fetch('/api/accounts/balance/')
+            .then(response => response.json())
+            .then(data => {
+                const balanceElements = document.querySelectorAll('#user-balance, .balance-display h3');
+                balanceElements.forEach(element => {
+                    element.textContent = '$' + parseFloat(data.balance).toFixed(2);
+                });
+            })
+            .catch(error => console.error('Error updating balance:', error));
+    }, 30000);
+
+    // Add click tracking for quick actions
+    document.querySelectorAll('.quick-action-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            console.log('Quick action clicked:', action);
+            // Add analytics tracking here if needed
+        });
+    });
+
+    // Animate stats cards on page load
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

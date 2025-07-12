@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - AUC 2.0{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.login-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-header h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #dee2e6;
+}
+
+.divider span {
+    background: #fff;
+    padding: 0 1rem;
+    color: #6c757d;
+}
+
+.social-login {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.social-login .btn {
+    flex: 1;
+    padding: 0.75rem;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.login-benefits {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.login-benefits h5 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.login-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.login-benefits li {
+    padding: 0.25rem 0;
+    color: #6c757d;
+}
+
+.login-benefits li i {
+    color: #28a745;
+    margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        padding: 1rem;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+    }
+
+    .social-login {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 col-sm-8">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h2>
+                        <p>Sign in to your AUC 2.0 account</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form method="post" id="loginForm">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="id_username" name="username"
+                                   placeholder="Username or Email" value="{{ form.username.value|default:'' }}" required>
+                            <label for="id_username">
+                                <i class="fas fa-user me-2"></i>Username or Email
+                            </label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="id_password" name="password"
+                                   placeholder="Password" required>
+                            <label for="id_password">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                            <label class="form-check-label" for="remember_me">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-login">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </form>
+
+                    <div class="forgot-password">
+                        <a href="{% url 'accounts_web:change_password' %}" class="text-decoration-none">
+                            <i class="fas fa-key me-1"></i>Forgot your password?
+                        </a>
+                    </div>
+
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+
+                    <!-- Social Login Buttons -->
+                    <div class="social-login">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fab fa-google me-2"></i>Google
+                        </button>
+                        <button type="button" class="btn btn-outline-info">
+                            <i class="fab fa-telegram me-2"></i>Telegram
+                        </button>
+                    </div>
+
+                    <div class="register-link">
+                        <p class="mb-0">Don't have an account?
+                            <a href="{% url 'accounts_web:register' %}" class="text-decoration-none">
+                                <strong>Sign up here</strong>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Login Benefits -->
+                <div class="login-benefits">
+                    <h5><i class="fas fa-star me-2"></i>Why Login?</h5>
+                    <ul>
+                        <li><i class="fas fa-check"></i>Participate in auctions</li>
+                        <li><i class="fas fa-check"></i>Track your bids and wins</li>
+                        <li><i class="fas fa-check"></i>Create your own auctions</li>
+                        <li><i class="fas fa-check"></i>Manage your watchlist</li>
+                        <li><i class="fas fa-check"></i>Secure payment system</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+
+    loginForm.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+
+        // Re-enable button after 5 seconds as fallback
+        setTimeout(function() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }, 5000);
+    });
+
+    // Handle social login buttons
+    const socialBtns = document.querySelectorAll('.social-login .btn');
+    socialBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const provider = this.textContent.trim();
+            // Add your social login logic here
+            console.log(`Social login with ${provider} clicked`);
+            // For now, show a message that it's not implemented
+            alert(`${provider} login will be implemented soon!`);
+        });
+    });
+
+    // Auto-focus username field
+    document.getElementById('id_username').focus();
+});
+</script>
+{% endblock %}
